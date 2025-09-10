@@ -1,5 +1,5 @@
 # ベースは公式の crawl4ai イメージを利用
-FROM unclecode/crawl4ai:0.7.3
+FROM unclecode/crawl4ai:0.7.4
 
 # Railway は $PORT を割り当てる。Gunicorn の bind を ENV で上書き
 # IPv4/IPv6 デュアルバインド（万一失敗したら [::] 単独に切替）
