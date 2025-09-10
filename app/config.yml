@@ -1,0 +1,23 @@
+# /app/config.yml
+app:
+  host: "0.0.0.0"   # 実際の bind は GUNICORN_CMD_ARGS で上書き
+  # port は server直起動時のみ参照。通常は Gunicorn が ${PORT} を使用。
+
+crawler:
+  timeouts:
+    stream_init: 30.0
+    batch_process: 300.0
+
+# 重要：PaaS安定化のためのブラウザ起動引数
+browser:
+  headless: true
+  args:
+    - "--no-sandbox"
+    - "--disable-dev-shm-usage"
+
+# 参考：既定で JS レンダは off（必要時にAPI側でrender_js:trueを指定）
+defaults:
+  extraction_strategy: "markdown"
+  render_js: false
+  wait_for: 0
+  timeout: 30000
