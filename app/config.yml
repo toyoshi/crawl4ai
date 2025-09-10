@@ -7,6 +7,8 @@ crawler:
   timeouts:
     stream_init: 30.0
     batch_process: 300.0
+  pool:
+    max_pages: 30        # ← これを追加（必須）
 
 # logging設定（KeyError回避のため追加）
 logging:
