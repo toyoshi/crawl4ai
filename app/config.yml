@@ -80,7 +80,7 @@ logging:
 # Observability Configuration
 observability:
   prometheus:
-    enabled: True
+    enabled: False  # Railway環境では一旦無効化（JSONシリアライズ問題回避）
     endpoint: "/metrics"
   health_check:
     endpoint: "/health"
