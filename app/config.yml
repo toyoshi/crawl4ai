@@ -1,26 +1,89 @@
 # /app/config.yml
+# Application Configuration
 app:
+  title: "Crawl4AI API"
+  version: "1.0.0"
   host: "0.0.0.0"   # 実際の bind は GUNICORN_CMD_ARGS で上書き
-  # port は server直起動時のみ参照。通常は Gunicorn が ${PORT} を使用。
+  port: 11234       # port は server直起動時のみ参照。通常は Gunicorn が ${PORT} を使用。
+  reload: False
+  workers: 1
+  timeout_keep_alive: 300
 
+# Default LLM Configuration (必須フィールド)
+llm:
+  provider: "openai/gpt-4o-mini"
+  api_key_env: "OPENAI_API_KEY"
+
+# Redis Configuration
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: ""
+  ssl: False
+  ssl_cert_reqs: None
+  ssl_ca_certs: None
+  ssl_certfile: None
+  ssl_keyfile: None
+
+# Rate Limiting Configuration
+rate_limiting:
+  enabled: True
+  default_limit: "1000/minute"
+  trusted_proxies: []
+  storage_uri: "memory://"
+
+# Security Configuration
+security:
+  enabled: false 
+  jwt_enabled: false 
+  https_redirect: false
+  trusted_hosts: ["*"]
+  headers:
+    x_content_type_options: "nosniff"
+    x_frame_options: "DENY"
+    content_security_policy: "default-src 'self'"
+    strict_transport_security: "max-age=63072000; includeSubDomains"
+
+# Crawler Configuration
 crawler:
+  base_config:
+    simulate_user: true
+  memory_threshold_percent: 95.0
+  rate_limiter:
+    enabled: true
+    base_delay: [1.0, 2.0]
   timeouts:
     stream_init: 30.0
     batch_process: 300.0
   pool:
-    max_pages: 30        # ← これを追加（必須）
+    max_pages: 30                          # Railway向けに調整
+    idle_ttl_sec: 1800
+  browser:
+    kwargs:
+      headless: true
+      text_mode: true
+    extra_args:
+      - "--no-sandbox"
+      - "--disable-dev-shm-usage"          # 重要：PaaS安定化
+      - "--disable-gpu"
+      - "--disable-software-rasterizer"
+      - "--disable-web-security"
+      - "--allow-insecure-localhost"
+      - "--ignore-certificate-errors"
 
-# logging設定（KeyError回避のため追加）
+# Logging Configuration
 logging:
   level: "INFO"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-# 重要：PaaS安定化のためのブラウザ起動引数
-browser:
-  headless: true
-  args:
-    - "--no-sandbox"
-    - "--disable-dev-shm-usage"
+# Observability Configuration
+observability:
+  prometheus:
+    enabled: True
+    endpoint: "/metrics"
+  health_check:
+    endpoint: "/health"
 
 # 参考：既定で JS レンダは off（必要時にAPI側でrender_js:trueを指定）
 defaults:
