@@ -28,7 +28,7 @@ redis:
 
 # Rate Limiting Configuration
 rate_limiting:
-  enabled: True
+  enabled: False  # Railway環境ではスレッド制限のため無効化
   default_limit: "1000/minute"
   trusted_proxies: []
   storage_uri: "memory://"
