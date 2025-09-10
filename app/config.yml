@@ -8,6 +8,11 @@ crawler:
     stream_init: 30.0
     batch_process: 300.0
 
+# logging設定（KeyError回避のため追加）
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
 # 重要：PaaS安定化のためのブラウザ起動引数
 browser:
   headless: true
