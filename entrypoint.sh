@@ -1,22 +1,26 @@
-# /app/config.yml
+#!/bin/sh
+set -e
+
+# 環境変数をconfig.ymlに適用
+cat > /app/config_runtime.yml <<EOF
 # Application Configuration
 app:
   title: "Crawl4AI API"
   version: "1.0.0"
-  host: "0.0.0.0"   # 実際の bind は GUNICORN_CMD_ARGS で上書き
-  port: 11234       # port は server直起動時のみ参照。通常は Gunicorn が ${PORT} を使用。
+  host: "0.0.0.0"
+  port: 11234
   reload: False
   workers: 1
   timeout_keep_alive: 300
 
-# Default LLM Configuration (必須フィールド)
+# Default LLM Configuration
 llm:
   provider: "openai/gpt-4o-mini"
   api_key_env: "OPENAI_API_KEY"
 
 # Redis Configuration
 redis:
-  host: "${REDIS_HOST:-localhost}"  # Railway環境変数を使用
+  host: "${REDIS_HOST:-localhost}"
   port: ${REDIS_PORT:-6379}
   db: 0
   password: "${REDIS_PASSWORD:-}"
@@ -28,15 +32,15 @@ redis:
 
 # Rate Limiting Configuration
 rate_limiting:
-  enabled: True  # Redisベースなので有効化可能
+  enabled: ${RATE_LIMIT_ENABLED:-true}
   default_limit: "1000/minute"
   trusted_proxies: []
-  storage_uri: "redis://${REDIS_USER:-default}:${REDIS_PASSWORD:-}@${REDIS_HOST:-localhost}:${REDIS_PORT:-6379}/1"  # DB 1をrate limit用に使用
+  storage_uri: "redis://${REDIS_USER:-default}:${REDIS_PASSWORD:-}@${REDIS_HOST:-localhost}:${REDIS_PORT:-6379}/1"
 
 # Security Configuration
 security:
-  enabled: false 
-  jwt_enabled: false 
+  enabled: false
+  jwt_enabled: false
   https_redirect: false
   trusted_hosts: ["*"]
   headers:
@@ -57,7 +61,7 @@ crawler:
     stream_init: 30.0
     batch_process: 300.0
   pool:
-    max_pages: 30                          # Railway向けに調整
+    max_pages: 30
     idle_ttl_sec: 1800
   browser:
     kwargs:
@@ -65,7 +69,7 @@ crawler:
       text_mode: true
     extra_args:
       - "--no-sandbox"
-      - "--disable-dev-shm-usage"          # 重要：PaaS安定化
+      - "--disable-dev-shm-usage"
       - "--disable-gpu"
       - "--disable-software-rasterizer"
       - "--disable-web-security"
@@ -80,14 +84,21 @@ logging:
 # Observability Configuration
 observability:
   prometheus:
-    enabled: False  # Railway環境では一旦無効化（JSONシリアライズ問題回避）
+    enabled: false
     endpoint: "/metrics"
   health_check:
     endpoint: "/health"
 
-# 参考：既定で JS レンダは off（必要時にAPI側でrender_js:trueを指定）
+# Defaults
 defaults:
   extraction_strategy: "markdown"
   render_js: false
   wait_for: 0
   timeout: 30000
+EOF
+
+# 設定ファイルを適切な場所にコピー
+mv /app/config_runtime.yml /app/config.yml
+
+# supervisordを起動
+exec supervisord -c supervisord.conf
