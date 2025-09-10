@@ -11,9 +11,8 @@ ENV REDIS_PORT="${QUEUE_BULL_REDIS_PORT}"
 ENV REDIS_PASSWORD="${QUEUE_BULL_REDIS_PASSWORD}"
 ENV REDIS_USER="${QUEUE_BULL_REDIS_USERNAME}"
 
-# エントリーポイントスクリプトをコピー
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+# エントリーポイントスクリプトをコピー（実行権限付き）
+COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
 
 # Playwright の Chromium をビルド時に取得（初回起動の失敗を防ぐ）
 RUN python -m playwright install chromium
